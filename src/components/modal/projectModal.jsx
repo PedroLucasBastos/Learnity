@@ -42,13 +42,19 @@ const ProjectModal = ({ isOpen, onClose }) => {
     setFormData({ ...formData, advisors: newAdvisors });
   };
 
+  const handleFileUpload = (file) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setFormData({ ...formData, file: reader.result }); // Salva como Base64
+    };
+    return false; // Evita o upload automático do Ant Design
+  };
+
   const uploadProps = {
     name: "file",
     multiple: false,
-    beforeUpload: (file) => {
-      setFormData({ ...formData, file });
-      return false;
-    },
+    beforeUpload: handleFileUpload,
   };
 
   const handleSubmit = () => {

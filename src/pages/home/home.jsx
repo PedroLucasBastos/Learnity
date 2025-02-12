@@ -2,14 +2,20 @@ import React, { useState } from "react";
 import { Button, Input, Card } from "antd";
 import { FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Link, useNavigate } from "react-router-dom"; // Altere a importação
 import "./home.css";
 import ProjectModal from "../../components/modal/projectModal";
 
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate(); // Usando o hook useNavigate
 
   const showModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const handleViewProjects = () => {
+    navigate("/view"); // Usando navigate para redirecionar
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-between bg-white text-center">
@@ -26,7 +32,9 @@ const Home = () => {
         </div>
         <nav>
           <ul className="flex space-x-6">
-            <li>Início</li>
+            <Link to="/" className="hover:text-gray-300">
+              Início
+            </Link>
             <li>Sobre</li>
             <li>Contato</li>
             <li>FAQ</li>
@@ -56,7 +64,11 @@ const Home = () => {
 
         {/* Botões */}
         <div className="mt-6 mb-10 flex flex-col space-y-28 items-center">
-          <Button type="primary" className="w-60 h-20 button-custom">
+          <Button
+            type="primary"
+            className="w-60 h-20 button-custom"
+            onClick={handleViewProjects}
+          >
             Exibir Projetos
           </Button>
           <Button
