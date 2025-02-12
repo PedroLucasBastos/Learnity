@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Input, Card } from "antd";
 import { FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import "./home.css";
+import ProjectModal from "../../components/modal/projectModal";
 
 const Home = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const showModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-between bg-white text-center">
       {/* Header */}
@@ -31,11 +37,11 @@ const Home = () => {
       {/* Main Content */}
       <main className="flex flex-col flex-grow items-center justify-center w-full">
         {/* Logo */}
-        <div className="my-6 ">
+        <div className="my-6">
           <img
             src="./svg/logoLearnity 1.svg"
             alt="logoTexto"
-            className="flex items-center h-72 "
+            className="flex items-center h-72"
           />
         </div>
 
@@ -53,7 +59,11 @@ const Home = () => {
           <Button type="primary" className="w-60 h-20 button-custom">
             Exibir Projetos
           </Button>
-          <Button type="primary" className="w-72 h-28 button-custom">
+          <Button
+            type="primary"
+            className="w-72 h-28 button-custom"
+            onClick={showModal}
+          >
             <PlusOutlined /> Cadastrar novo projeto
           </Button>
         </div>
@@ -81,6 +91,9 @@ const Home = () => {
           © 2024 Learnity - Todos os direitos reservados.
         </p>
       </footer>
+
+      {/* Modal de Cadastro */}
+      <ProjectModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 };
