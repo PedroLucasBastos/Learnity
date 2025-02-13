@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, Select, Upload, message } from "antd";
 import { InboxOutlined, PlusOutlined, CloseOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 const { Dragger } = Upload;
 
-const ProjectModal = ({ isOpen, onClose }) => {
+const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
@@ -15,6 +15,12 @@ const ProjectModal = ({ isOpen, onClose }) => {
     fileName: "",
     course: "",
   });
+
+  useEffect(() => {
+    if (project) {
+      setFormData(project); // Carrega os dados para edição
+    }
+  }, [project]);
 
   const handleNext = () => setStep(2);
   const handleBack = () => setStep(1);
@@ -48,7 +54,7 @@ const ProjectModal = ({ isOpen, onClose }) => {
         fileName: file.name, // Salva o nome do arquivo
       });
     };
-    return false; // Evita o upload automático do Ant Design
+    return false;
   };
 
   const uploadProps = {
@@ -59,19 +65,36 @@ const ProjectModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = () => {
     const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
-    const newProject = {
-      ...formData,
-      id: Date.now(), // Gera um ID único
-    };
-    const newProjects = [...storedProjects, newProject];
-    localStorage.setItem("projects", JSON.stringify(newProjects));
-    message.success("Projeto cadastrado com sucesso!");
+
+    if (project) {
+      // Atualiza projeto existente
+      const updatedProjects = storedProjects.map((p) =>
+        p.id === project.id ? { ...formData } : p
+      );
+      localStorage.setItem("projects", JSON.stringify(updatedProjects));
+      message.success("Projeto atualizado com sucesso!");
+    } else {
+      // Adiciona um novo projeto
+      const newProject = {
+        ...formData,
+        id: Date.now(),
+      };
+      const newProjects = [...storedProjects, newProject];
+      localStorage.setItem("projects", JSON.stringify(newProjects));
+      message.success("Projeto cadastrado com sucesso!");
+    }
+
     onClose();
+    if (updateProject) updateProject(); // ATUALIZA A LISTA NA INTERFACE
   };
 
   return (
     <Modal
-      title={<h2 className="text-xl font-bold">Registrar novo projeto</h2>}
+      title={
+        <h2 className="text-xl font-bold">
+          {project ? "Editar Projeto" : "Registrar novo projeto"}
+        </h2>
+      }
       open={isOpen}
       onCancel={onClose}
       footer={null}
@@ -165,7 +188,7 @@ const ProjectModal = ({ isOpen, onClose }) => {
               className="bg-primaryGreen text-white"
               onClick={handleSubmit}
             >
-              Cadastrar
+              {project ? "Salvar alterações" : "Cadastrar"}
             </Button>
           </div>
         </div>
