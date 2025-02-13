@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Modal, Button, Input, Select, Upload, message } from "antd";
 import { InboxOutlined, PlusOutlined, CloseOutlined } from "@ant-design/icons";
 
@@ -12,13 +12,9 @@ const ProjectModal = ({ isOpen, onClose }) => {
     advisors: [""],
     description: "",
     file: null,
+    fileName: "",
     course: "",
   });
-
-  useEffect(() => {
-    const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
-    console.log("Projetos armazenados:", storedProjects);
-  }, []);
 
   const handleNext = () => setStep(2);
   const handleBack = () => setStep(1);
@@ -46,7 +42,11 @@ const ProjectModal = ({ isOpen, onClose }) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      setFormData({ ...formData, file: reader.result }); // Salva como Base64
+      setFormData({
+        ...formData,
+        file: reader.result, // Salva como Base64
+        fileName: file.name, // Salva o nome do arquivo
+      });
     };
     return false; // Evita o upload automático do Ant Design
   };
@@ -59,10 +59,13 @@ const ProjectModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = () => {
     const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
-    const newProjects = [...storedProjects, formData];
+    const newProject = {
+      ...formData,
+      id: Date.now(), // Gera um ID único
+    };
+    const newProjects = [...storedProjects, newProject];
     localStorage.setItem("projects", JSON.stringify(newProjects));
     message.success("Projeto cadastrado com sucesso!");
-    console.log("Dados do projeto cadastrado:", formData);
     onClose();
   };
 
