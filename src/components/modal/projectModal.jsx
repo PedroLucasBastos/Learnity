@@ -17,11 +17,22 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
   });
 
   useEffect(() => {
-    if (project) {
-      setFormData(project); // Carrega os dados para edição
+    if (isOpen) {
+      setStep(1); // Reseta o step para 1 sempre que o modal for aberto
+      if (project) {
+        setFormData(project); // Carrega os dados para edição
+      } else {
+        setFormData({
+          title: "",
+          advisors: [""],
+          description: "",
+          file: null,
+          fileName: "",
+          course: "",
+        }); // Resetando os dados do projeto se for novo
+      }
     }
-  }, [project]);
-
+  }, [isOpen, project]); // A dependência de isOpen faz com que isso aconteça toda vez que o modal é aberto
   const handleNext = () => setStep(2);
   const handleBack = () => setStep(1);
 
@@ -64,6 +75,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
   };
 
   const handleSubmit = () => {
+    console.log(formData); // Verifica o conteúdo de formData antes de salvar
     const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
 
     if (project) {
@@ -85,7 +97,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
     }
 
     onClose();
-    if (updateProject) updateProject(); // ATUALIZA A LISTA NA INTERFACE
+    if (updateProject) updateProject(); // Atualiza a lista na interface
   };
 
   return (

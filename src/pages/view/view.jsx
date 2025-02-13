@@ -73,7 +73,7 @@ const View = () => {
       </h1>
 
       {/* Barra de Pesquisa Centralizada */}
-      <div className="flex items-center space-x-2 w-3/5 mx-auto mb-7">
+      <div className="flex items-center space-x-2 w-3/5 mx-auto mb-8">
         <Input
           className="w-full"
           placeholder="Buscar por título ou descrição"
@@ -83,7 +83,7 @@ const View = () => {
       </div>
 
       {/* Lista de Projetos */}
-      <div className="w-full px-4 md:px-16 lg:px-32">
+      <div className="w-full px-4 md:px-16 lg:px-32 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.length > 0 ? (
             filteredProjects.map((project, index) => (

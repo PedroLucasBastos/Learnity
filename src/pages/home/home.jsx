@@ -9,11 +9,17 @@ import Footer from "../../components/footer/footer";
 
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
-  const showModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const showModal = () => {
+    setIsModalOpen(true); // Abre o modal
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false); // Fecha o modal
+  };
+
   const handleViewProjects = () => navigate("/view");
   const handleSearch = () => {
     navigate(`/view?search=${searchTerm}`); // Passa o termo de pesquisa na URL
@@ -79,7 +85,12 @@ const Home = () => {
 
       <Footer />
 
-      <ProjectModal isOpen={isModalOpen} onClose={closeModal} />
+      {/* Passando função de resetar o formulário para o ProjectModal */}
+      <ProjectModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        resetForm={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };
