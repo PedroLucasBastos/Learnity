@@ -106,7 +106,7 @@ const View = () => {
                 </p>
                 <div className="mt-4 flex justify-between items-center">
                   <span className="text-gray-300">
-                    {project.file?.name || "Nenhum arquivo"}
+                    {project.fileName || "Nenhum arquivo"}
                   </span>
                   <EyeOutlined
                     className="text-2xl cursor-pointer text-primaryGreen hover:text-green-500"
