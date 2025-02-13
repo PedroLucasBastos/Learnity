@@ -10,10 +10,14 @@ import Footer from "../../components/footer/footer";
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const showModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const handleViewProjects = () => navigate("/view");
+  const handleSearch = () => {
+    navigate(`/view?search=${searchTerm}`); // Passa o termo de pesquisa na URL
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-between bg-white text-center">
@@ -30,8 +34,17 @@ const Home = () => {
         </div>
 
         <div className="flex items-center space-x-2 w-3/5">
-          <Input className="w-full" placeholder="Buscar" />
-          <Button type="primary" className="button-custom">
+          <Input
+            className="w-full"
+            placeholder="Buscar"
+            value={searchTerm} // Adiciona o valor do estado aqui
+            onChange={(e) => setSearchTerm(e.target.value)} // Atualiza o estado ao digitar
+          />
+          <Button
+            type="primary"
+            className="button-custom"
+            onClick={handleSearch}
+          >
             <SearchOutlined /> Buscar
           </Button>
         </div>
