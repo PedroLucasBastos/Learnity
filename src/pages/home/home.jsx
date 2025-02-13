@@ -30,7 +30,7 @@ const Home = () => {
       <Header />
 
       {/* Main Content */}
-      <main className="flex flex-col flex-grow items-center justify-center w-full">
+      <main className="flex flex-col flex-grow items-center justify-center w-full mb-5">
         <div className="my-6">
           <img
             src="./svg/logoLearnity 1.svg"

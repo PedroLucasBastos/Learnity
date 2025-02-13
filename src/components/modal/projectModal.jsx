@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, Select, Upload, message } from "antd";
 import { InboxOutlined, PlusOutlined, CloseOutlined } from "@ant-design/icons";
+import SubjectsSelector from "../subjectsData/subjectsSelector";
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -191,6 +192,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             <Option value="Alimentos">Alimentos</Option>
             <Option value="Agropecuária">Agropecuária</Option>
           </Select>
+          <SubjectsSelector selectedCourse={formData.course} />
 
           <div className="flex justify-between mt-4">
             <Button className="bg-gray-400 text-white" onClick={handleBack}>
