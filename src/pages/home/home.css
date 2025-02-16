@@ -11,3 +11,8 @@
   text-decoration: none;
   color: black !important;
 }
+.arrow-custom:hover {
+  border-color: #7ed957 !important;
+  text-decoration: none;
+  color: black !important;
+}

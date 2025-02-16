@@ -191,9 +191,17 @@ const View = () => {
                 <p>
                   <strong>Curso:</strong> {project.course}
                 </p>
-                <p>
+                <p
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3, // Limita a descrição a 4 linhas
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden", // Esconde o excesso de conteúdo
+                  }}
+                >
                   <strong>Descrição:</strong> {project.description}
                 </p>
+
                 <div className="mt-4">
                   <span className="text-gray-300">
                     {project.fileName || "Nenhum arquivo"}
