@@ -101,7 +101,7 @@ const Home = () => {
                 className="text-sm overflow-hidden text-ellipsis"
                 style={{
                   display: "-webkit-box",
-                  WebkitLineClamp: 7,
+                  WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
                 }}
               >
