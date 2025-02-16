@@ -7,6 +7,9 @@ const { Option } = Select;
 const { Dragger } = Upload;
 
 const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
+  // Use o hook useMessage dentro do componente
+  const [messageApi, contextHolder] = message.useMessage();
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
@@ -15,14 +18,23 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
     file: null,
     fileName: "",
     course: "",
-    selectedSubjects: [], // Novo campo para as seleções
+    selectedSubjects: [],
+  });
+
+  const [errors, setErrors] = useState({
+    title: false,
+    advisors: false,
+    description: false,
+    file: false,
+    course: false,
+    selectedSubjects: false,
   });
 
   useEffect(() => {
     if (isOpen) {
       setStep(1); // Reseta o step para 1 sempre que o modal for aberto
       if (project) {
-        setFormData(project); // Carrega os dados para edição (incluindo selectedSubjects)
+        setFormData(project); // Carrega os dados para edição
       } else {
         setFormData({
           title: "",
@@ -37,7 +49,57 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
     }
   }, [isOpen, project]);
 
-  const handleNext = () => setStep(2);
+  // Validação para o Step 1 (campos: título, orientadores, descrição, upload)
+  const validateStep1 = () => {
+    const { title, advisors, description, file } = formData;
+    let newErrors = {
+      title: !title,
+      advisors: advisors.some((advisor) => !advisor),
+      description: !description,
+      file: !file,
+    };
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+
+    if (
+      newErrors.title ||
+      newErrors.advisors ||
+      newErrors.description ||
+      newErrors.file
+    ) {
+      messageApi.error(
+        "Preencha os campos do primeiro passo: Título, Orientador(es), Descrição e Upload de arquivo."
+      );
+      return false;
+    }
+    return true;
+  };
+
+  // Validação para o Step 2 (campos: curso e disciplinas)
+  const validateStep2 = () => {
+    const { course, selectedSubjects } = formData;
+    let newErrors = {
+      course: !course,
+      selectedSubjects: selectedSubjects.length === 0,
+    };
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+
+    if (newErrors.course || newErrors.selectedSubjects) {
+      messageApi.error(
+        "Preencha os campos do segundo passo: Curso e Disciplinas."
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep1()) {
+      setStep(2); // Avança para o step 2
+    }
+  };
+
   const handleBack = () => setStep(1);
 
   const handleChange = (e, index = null) => {
@@ -60,16 +122,22 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
   };
 
   const handleFileUpload = (file) => {
+    const isPDF = file.type === "application/pdf";
+    if (!isPDF) {
+      messageApi.error("Apenas arquivos PDF são permitidos.");
+      return false; // Impede o upload
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         file: reader.result, // Salva como Base64
         fileName: file.name, // Salva o nome do arquivo
-      });
+      }));
     };
-    return false;
+    return false; // Evita o comportamento padrão de upload
   };
 
   const uploadProps = {
@@ -78,30 +146,42 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
     beforeUpload: handleFileUpload,
   };
 
+  // Função para tratar o envio (no step 2)
   const handleSubmit = () => {
-    console.log(formData); // Verifica o conteúdo de formData (incluindo selectedSubjects)
-    const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
+    if (!validateStep2()) return;
 
-    if (project) {
-      // Atualiza projeto existente
-      const updatedProjects = storedProjects.map((p) =>
-        p.id === project.id ? { ...formData } : p
-      );
-      localStorage.setItem("projects", JSON.stringify(updatedProjects));
-      message.success("Projeto atualizado com sucesso!");
-    } else {
-      // Adiciona um novo projeto
-      const newProject = {
-        ...formData,
-        id: Date.now(),
-      };
-      const newProjects = [...storedProjects, newProject];
-      localStorage.setItem("projects", JSON.stringify(newProjects));
-      message.success("Projeto cadastrado com sucesso!");
+    try {
+      const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
+
+      if (project) {
+        const updatedProjects = storedProjects.map((p) =>
+          p.id === project.id ? { ...formData } : p
+        );
+        localStorage.setItem("projects", JSON.stringify(updatedProjects));
+        messageApi.success("Projeto atualizado com sucesso!"); // Sucesso (verde)
+      } else {
+        const newProject = {
+          ...formData,
+          id: Date.now(),
+        };
+        const newProjects = [...storedProjects, newProject];
+        localStorage.setItem("projects", JSON.stringify(newProjects));
+        messageApi.success("Projeto cadastrado com sucesso!"); // Sucesso (verde)
+      }
+    } catch (error) {
+      console.error(error);
+      messageApi.error("Erro ao salvar o projeto!"); // Erro (vermelha)
+      return;
     }
 
     onClose();
-    if (updateProject) updateProject(); // Atualiza a lista na interface
+    if (updateProject) updateProject();
+  };
+
+  // Função para tratar o cancelamento
+  const handleCancel = () => {
+    messageApi.error("Operação cancelada com sucesso!"); // Cancelamento (vermelha)
+    onClose();
   };
 
   return (
@@ -112,10 +192,12 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
         </h2>
       }
       open={isOpen}
-      onCancel={onClose}
+      onCancel={handleCancel}
       footer={null}
       width="50vw"
     >
+      {/* Renderize o contextHolder para exibir as mensagens */}
+      {contextHolder}
       {step === 1 ? (
         <div className="flex flex-col space-y-4">
           <label className="font-semibold">Título:</label>
@@ -124,7 +206,11 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             placeholder="Digite o título do projeto"
             value={formData.title}
             onChange={handleChange}
+            className={errors.title ? "border-red-500" : ""}
           />
+          {errors.title && (
+            <p className="text-red-500 text-sm">Título é obrigatório</p>
+          )}
 
           <label className="font-semibold">Nome do(s) orientador(es):</label>
           {formData.advisors.map((advisor, index) => (
@@ -133,6 +219,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
                 placeholder={`Nome do orientador ${index + 1}`}
                 value={advisor}
                 onChange={(e) => handleChange(e, index)}
+                className={errors.advisors ? "border-red-500" : ""}
               />
               {index > 0 && (
                 <Button
@@ -144,6 +231,11 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
               )}
             </div>
           ))}
+          {errors.advisors && (
+            <p className="text-red-500 text-sm">
+              O nome de todos os orientadores é obrigatório
+            </p>
+          )}
 
           <Button
             className="bg-primaryGreen text-white flex items-center"
@@ -159,10 +251,17 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             placeholder="Digite sobre seu projeto"
             value={formData.description}
             onChange={handleChange}
+            className={errors.description ? "border-red-500" : ""}
           />
+          {errors.description && (
+            <p className="text-red-500 text-sm">A descrição é obrigatória</p>
+          )}
 
           <label className="font-semibold">Upload de arquivos:</label>
-          <Dragger {...uploadProps}>
+          <Dragger
+            {...uploadProps}
+            className={errors.file ? "border-red-500" : ""}
+          >
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
@@ -171,9 +270,14 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             </p>
             <p className="ant-upload-hint">Suporta apenas um arquivo PDF.</p>
           </Dragger>
+          {errors.file && (
+            <p className="text-red-500 text-sm">
+              Arquivo é obrigatório e deve ser um PDF
+            </p>
+          )}
 
           <div className="flex justify-between mt-4">
-            <Button className="bg-red-500 text-white" onClick={onClose}>
+            <Button className="bg-red-500 text-white" onClick={handleCancel}>
               Cancelar
             </Button>
             <Button className="bg-primaryGreen text-white" onClick={handleNext}>
@@ -188,6 +292,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             placeholder="Escolha um curso"
             value={formData.course}
             onChange={(value) => setFormData({ ...formData, course: value })}
+            className={errors.course ? "border-red-500" : ""}
           >
             <Option value="Meio Ambiente">Meio Ambiente</Option>
             <Option value="Química">Química</Option>
@@ -195,12 +300,21 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             <Option value="Alimentos">Alimentos</Option>
             <Option value="Agropecuária">Agropecuária</Option>
           </Select>
+          {errors.course && (
+            <p className="text-red-500 text-sm">O curso é obrigatório</p>
+          )}
+
           <SubjectsSelector
             selectedCourse={formData.course}
             onSelectionChange={(selected) =>
               setFormData({ ...formData, selectedSubjects: selected })
             }
           />
+          {errors.selectedSubjects && (
+            <p className="text-red-500 text-sm">
+              Selecione ao menos uma disciplina
+            </p>
+          )}
 
           <div className="flex justify-between mt-4">
             <Button className="bg-gray-400 text-white" onClick={handleBack}>
