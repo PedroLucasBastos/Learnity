@@ -12,6 +12,29 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Modal para exibir os detalhes do projeto (visualização somente leitura)
 const ViewProjectModal = ({ isOpen, onClose, project }) => {
+  const downloadPdf = (base64String) => {
+    // Decodifica o base64 para um ArrayBuffer
+    const byteCharacters = atob(base64String);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+      const byteNumbers = new Array(slice.length);
+
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    return url;
+  };
+
   return (
     <Modal
       title={<h2 className="text-xl font-bold">Detalhes do Projeto</h2>}
@@ -49,7 +72,23 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
             </p>
           )}
           <p>
-            <strong>Arquivo:</strong> {project.fileName || "Nenhum arquivo"}
+            <strong>Arquivo:</strong>{" "}
+            {project.fileName ? (
+              <a
+                href={downloadPdf(
+                  project.file.startsWith("data:application/pdf;base64,")
+                    ? project.file.split(",")[1]
+                    : project.file
+                )}
+                target="_blank" // Abre o PDF em uma nova aba
+                rel="noopener noreferrer" // Para melhorar a segurança ao abrir o link
+                className="text-primaryGreen"
+              >
+                {project.fileName}
+              </a>
+            ) : (
+              "Nenhum arquivo"
+            )}
           </p>
         </div>
       ) : (
