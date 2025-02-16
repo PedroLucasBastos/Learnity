@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { subjectsData } from "./subjectsData";
-import { Checkbox } from "antd";
+import RecursiveTopic from "../recursiveTopic/recursiveTopic";
 
-const SubjectsSelector = ({ selectedCourse }) => {
-  const [openTopics, setOpenTopics] = useState({});
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
+const SubjectsSelector = ({ selectedCourse, onSelectionChange }) => {
+  const [selectedItems, setSelectedItems] = useState([]);
 
   if (!selectedCourse || !subjectsData[selectedCourse]) {
     return (
@@ -14,42 +13,27 @@ const SubjectsSelector = ({ selectedCourse }) => {
     );
   }
 
-  const toggleTopic = (topic) => {
-    setOpenTopics((prev) => ({ ...prev, [topic]: !prev[topic] }));
-  };
-
-  const handleSelection = (subject) => {
-    setSelectedSubjects((prev) =>
-      prev.includes(subject)
-        ? prev.filter((s) => s !== subject)
-        : [...prev, subject]
-    );
+  const handleSelect = (item) => {
+    const newSelected = selectedItems.includes(item)
+      ? selectedItems.filter((i) => i !== item)
+      : [...selectedItems, item];
+    setSelectedItems(newSelected);
+    if (onSelectionChange) {
+      onSelectionChange(newSelected);
+    }
   };
 
   return (
-    <div className="space-y-4">
-      {Object.keys(subjectsData[selectedCourse]).map((topic) => (
-        <div key={topic} className="border p-2 rounded-lg">
-          <button
-            className="w-full text-left font-semibold text-primaryGreen hover:text-green-700"
-            onClick={() => toggleTopic(topic)}
-          >
-            {topic}
-          </button>
-          {openTopics[topic] && (
-            <div className="mt-2 space-y-1">
-              {subjectsData[selectedCourse][topic].map((subject) => (
-                <Checkbox
-                  key={subject}
-                  checked={selectedSubjects.includes(subject)}
-                  onChange={() => handleSelection(subject)}
-                >
-                  {subject}
-                </Checkbox>
-              ))}
-            </div>
-          )}
-        </div>
+    <div className="space-y-2">
+      {Object.keys(subjectsData[selectedCourse]).map((topLevelKey) => (
+        <RecursiveTopic
+          key={topLevelKey}
+          topic={topLevelKey}
+          data={subjectsData[selectedCourse][topLevelKey]}
+          onSelect={handleSelect}
+          selectedItems={selectedItems}
+          level={0}
+        />
       ))}
     </div>
   );

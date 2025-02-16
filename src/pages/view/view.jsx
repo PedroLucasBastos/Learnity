@@ -1,19 +1,73 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Button, Card, Input } from "antd";
-import { EyeOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Card, Input, Modal } from "antd";
+import {
+  DeleteOutlined,
+  SearchOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import Header from "../../components/header/header";
 import Footer from "../../components/footer/footer";
 import ProjectModal from "../../components/modal/projectModal";
-import { useLocation, useNavigate } from "react-router-dom"; // Adicionado o useNavigate
+import { useLocation, useNavigate } from "react-router-dom";
+
+// Modal para exibir os detalhes do projeto (visualização somente leitura)
+const ViewProjectModal = ({ isOpen, onClose, project }) => {
+  return (
+    <Modal
+      title={<h2 className="text-xl font-bold">Detalhes do Projeto</h2>}
+      open={isOpen}
+      onCancel={onClose}
+      footer={[
+        <Button
+          key="close"
+          onClick={onClose}
+          className="bg-primaryGreen text-white"
+        >
+          Fechar
+        </Button>,
+      ]}
+      width="50vw"
+    >
+      {project ? (
+        <div className="flex flex-col space-y-4">
+          <p>
+            <strong>Título:</strong> {project.title}
+          </p>
+          <p>
+            <strong>Orientador(es):</strong> {project.advisors.join(", ")}
+          </p>
+          <p>
+            <strong>Descrição:</strong> {project.description}
+          </p>
+          <p>
+            <strong>Curso:</strong> {project.course}
+          </p>
+          {project.selectedSubjects && project.selectedSubjects.length > 0 && (
+            <p>
+              <strong>Disciplinas:</strong>{" "}
+              {project.selectedSubjects.join(", ")}
+            </p>
+          )}
+          <p>
+            <strong>Arquivo:</strong> {project.fileName || "Nenhum arquivo"}
+          </p>
+        </div>
+      ) : (
+        <p>Projeto não encontrado.</p>
+      )}
+    </Modal>
+  );
+};
 
 const View = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const location = useLocation();
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadProjects();
@@ -23,18 +77,18 @@ const View = () => {
     const searchTermFromUrl = urlParams.get("search");
     if (searchTermFromUrl) {
       setSearchTerm(searchTermFromUrl);
-      filterProjects(searchTermFromUrl); // Aplica o filtro com o termo da URL
+      filterProjects(searchTermFromUrl);
     }
-  }, [location]); // Atualiza quando a URL mudar
+  }, [location]);
 
   useEffect(() => {
-    filterProjects(searchTerm); // Aplica o filtro toda vez que searchTerm mudar
-  }, [searchTerm, projects]); // Atualiza ao mudar o termo ou os projetos
+    filterProjects(searchTerm);
+  }, [searchTerm, projects]);
 
   const loadProjects = () => {
     const savedProjects = JSON.parse(localStorage.getItem("projects")) || [];
     setProjects(savedProjects);
-    setFilteredProjects(savedProjects); // Inicialmente, mostra todos
+    setFilteredProjects(savedProjects);
   };
 
   const filterProjects = (term) => {
@@ -48,20 +102,43 @@ const View = () => {
 
   const handleSearch = (e) => {
     const term = e.target.value;
-    setSearchTerm(term); // Atualiza o termo de busca
+    setSearchTerm(term);
   };
 
   const deleteProject = useCallback((index) => {
     setProjects((prevProjects) => {
       const updatedProjects = prevProjects.filter((_, i) => i !== index);
       localStorage.setItem("projects", JSON.stringify(updatedProjects));
-      setFilteredProjects(updatedProjects); // Atualiza os filtrados também
+      setFilteredProjects(updatedProjects);
       return updatedProjects;
     });
   }, []);
 
+  // Abre o modal de visualização
+  const openViewModal = (project) => {
+    setSelectedProject(project);
+    setIsViewModalOpen(true);
+  };
+
+  // Abre o modal de edição (ProjectModal)
+  const openEditModal = (project) => {
+    setSelectedProject(project);
+    setIsEditModalOpen(true);
+  };
+
+  const closeViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedProject(null);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedProject(null);
+    loadProjects(); // Atualiza a lista após edição
+  };
+
   const handleBackToHome = () => {
-    navigate("/"); // Redireciona para a página inicial
+    navigate("/");
   };
 
   return (
@@ -90,7 +167,16 @@ const View = () => {
               <Card
                 key={index}
                 className="bg-gray-500 text-white w-full p-4 shadow-lg rounded-lg relative cursor-pointer"
+                onClick={() => openViewModal(project)}
               >
+                {/* Botão de Editar (fica ao lado do botão de excluir) */}
+                <EditOutlined
+                  className="absolute top-2 right-10 text-primaryGreen text-xl cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(project);
+                  }}
+                />
                 <DeleteOutlined
                   className="absolute top-2 right-2 text-red-500 text-xl cursor-pointer"
                   onClick={(e) => {
@@ -108,11 +194,10 @@ const View = () => {
                 <p>
                   <strong>Descrição:</strong> {project.description}
                 </p>
-                <div className="mt-4 flex justify-between items-center">
+                <div className="mt-4">
                   <span className="text-gray-300">
                     {project.fileName || "Nenhum arquivo"}
                   </span>
-                  <EyeOutlined className="text-2xl cursor-pointer text-primaryGreen hover:text-green-500" />
                 </div>
               </Card>
             ))
@@ -125,6 +210,25 @@ const View = () => {
       </div>
 
       <Footer />
+
+      {/* Modal de Edição */}
+      {isEditModalOpen && (
+        <ProjectModal
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          project={selectedProject}
+          updateProject={loadProjects}
+        />
+      )}
+
+      {/* Modal de Visualização */}
+      {isViewModalOpen && (
+        <ViewProjectModal
+          isOpen={isViewModalOpen}
+          onClose={closeViewModal}
+          project={selectedProject}
+        />
+      )}
     </div>
   );
 };

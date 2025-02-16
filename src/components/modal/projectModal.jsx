@@ -15,13 +15,14 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
     file: null,
     fileName: "",
     course: "",
+    selectedSubjects: [], // Novo campo para as seleções
   });
 
   useEffect(() => {
     if (isOpen) {
       setStep(1); // Reseta o step para 1 sempre que o modal for aberto
       if (project) {
-        setFormData(project); // Carrega os dados para edição
+        setFormData(project); // Carrega os dados para edição (incluindo selectedSubjects)
       } else {
         setFormData({
           title: "",
@@ -30,10 +31,12 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
           file: null,
           fileName: "",
           course: "",
-        }); // Resetando os dados do projeto se for novo
+          selectedSubjects: [],
+        });
       }
     }
-  }, [isOpen, project]); // A dependência de isOpen faz com que isso aconteça toda vez que o modal é aberto
+  }, [isOpen, project]);
+
   const handleNext = () => setStep(2);
   const handleBack = () => setStep(1);
 
@@ -76,7 +79,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
   };
 
   const handleSubmit = () => {
-    console.log(formData); // Verifica o conteúdo de formData antes de salvar
+    console.log(formData); // Verifica o conteúdo de formData (incluindo selectedSubjects)
     const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
 
     if (project) {
@@ -192,7 +195,12 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
             <Option value="Alimentos">Alimentos</Option>
             <Option value="Agropecuária">Agropecuária</Option>
           </Select>
-          <SubjectsSelector selectedCourse={formData.course} />
+          <SubjectsSelector
+            selectedCourse={formData.course}
+            onSelectionChange={(selected) =>
+              setFormData({ ...formData, selectedSubjects: selected })
+            }
+          />
 
           <div className="flex justify-between mt-4">
             <Button className="bg-gray-400 text-white" onClick={handleBack}>
