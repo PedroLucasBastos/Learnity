@@ -71,7 +71,7 @@ const About = () => {
             <Player
               autoplay
               loop
-              src="public/lotties/Animation-GirlBooks/animations/GirBooks.json"
+              src="/lotties/Animation-GirlBooks/animations/GirBooks.json"
               style={{ height: "650px", width: "650px" }}
             />
           </div>
