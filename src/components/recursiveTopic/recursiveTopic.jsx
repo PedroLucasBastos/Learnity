@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Checkbox } from "antd";
+import "./recursiveTopic.css";
 
 const RecursiveTopic = ({
   topic, // nome do tópico (por exemplo, "1º ANO", "Gramática", etc.)
@@ -16,16 +17,22 @@ const RecursiveTopic = ({
     return (
       <div style={indentStyle}>
         <strong>{topic}</strong>
-        {data.map((item, index) => (
-          <div key={item + index} style={{ marginLeft: 20 }}>
-            <Checkbox
-              checked={selectedItems.includes(item)}
-              onChange={() => onSelect(item)}
+        <div className="subtopic-container">
+          {data.map((item, index) => (
+            <div
+              key={item + index}
+              className="checkbox-item"
+              style={{ marginLeft: 20 }}
             >
-              {item}
-            </Checkbox>
-          </div>
-        ))}
+              <Checkbox
+                checked={selectedItems.includes(item)}
+                onChange={() => onSelect(item)}
+              >
+                {item}
+              </Checkbox>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -45,20 +52,22 @@ const RecursiveTopic = ({
         >
           {topic}
         </button>
-        {isOpen && (
-          <div>
-            {Object.keys(data).map((subKey) => (
-              <RecursiveTopic
-                key={subKey}
-                topic={subKey}
-                data={data[subKey]}
-                onSelect={onSelect}
-                selectedItems={selectedItems}
-                level={level + 1}
-              />
-            ))}
-          </div>
-        )}
+        <div className={`subtopic-container ${isOpen ? "" : "collapsed"}`}>
+          {isOpen && (
+            <div>
+              {Object.keys(data).map((subKey) => (
+                <RecursiveTopic
+                  key={subKey}
+                  topic={subKey}
+                  data={data[subKey]}
+                  onSelect={onSelect}
+                  selectedItems={selectedItems}
+                  level={level + 1}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }

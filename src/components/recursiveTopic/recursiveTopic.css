@@ -1,0 +1,33 @@
+/* Altera a caixinha do checkbox quando ele estiver marcado */
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #7ed957; /* Cor verde */
+  border-color: #7ed957; /* Cor da borda */
+}
+
+.ant-checkbox-checked .ant-checkbox-inner:after {
+  border-color: #fff; /* Cor do checkmark dentro da caixinha */
+}
+.ant-checkbox-checked .ant-checkbox-inner:hover {
+  background-color: #7ed957 !important; /* Cor verde */
+  border-color: #7ed957; /* Cor da borda */
+}
+
+/* recursiveTopic.css */
+
+/* Adiciona borda nos sub-tópicos */
+.subtopic-container {
+  border: 2px solid #7ed957; /* Cor da borda */
+  border-radius: 8px; /* Bordas arredondadas */
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease; /* Animação suave ao abrir */
+}
+
+/* Estilo de quando o sub-tópico está fechado (invisível) */
+.subtopic-container.collapsed {
+  display: none;
+}
+
+.checkbox-item {
+  margin-bottom: 10px; /* Espaço entre os itens */
+}

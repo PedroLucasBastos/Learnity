@@ -24,16 +24,20 @@ const SubjectsSelector = ({ selectedCourse, onSelectionChange }) => {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 p-4 bg-white rounded-lg shadow-md">
       {Object.keys(subjectsData[selectedCourse]).map((topLevelKey) => (
-        <RecursiveTopic
+        <div
           key={topLevelKey}
-          topic={topLevelKey}
-          data={subjectsData[selectedCourse][topLevelKey]}
-          onSelect={handleSelect}
-          selectedItems={selectedItems}
-          level={0}
-        />
+          className="border p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all"
+        >
+          <RecursiveTopic
+            topic={topLevelKey}
+            data={subjectsData[selectedCourse][topLevelKey]}
+            onSelect={handleSelect}
+            selectedItems={selectedItems}
+            level={0}
+          />
+        </div>
       ))}
     </div>
   );
