@@ -195,6 +195,7 @@ const ProjectModal = ({ isOpen, onClose, project, updateProject }) => {
       onCancel={handleCancel}
       footer={null}
       width="50vw"
+      maskClosable={false}
     >
       {/* Renderize o contextHolder para exibir as mensagens */}
       {contextHolder}
